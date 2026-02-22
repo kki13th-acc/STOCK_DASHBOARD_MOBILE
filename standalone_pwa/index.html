@@ -1,0 +1,132 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Market Atlas Tablet</title>
+  <meta name="theme-color" content="#0a0f16">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="img">
+          <defs>
+            <linearGradient id="brandG" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#22d3ee"/>
+              <stop offset="100%" stop-color="#38bdf8"/>
+            </linearGradient>
+          </defs>
+          <rect x="6" y="6" width="52" height="52" rx="14" fill="#0b1320"/>
+          <path d="M16 42l10-12 8 9 13-18 8 10" fill="none" stroke="url(#brandG)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="16" cy="42" r="2.5" fill="#67e8f9"/>
+          <circle cx="26" cy="30" r="2.5" fill="#67e8f9"/>
+          <circle cx="34" cy="39" r="2.5" fill="#67e8f9"/>
+          <circle cx="47" cy="21" r="2.5" fill="#67e8f9"/>
+          <circle cx="55" cy="31" r="2.5" fill="#67e8f9"/>
+        </svg>
+      </div>
+      <div>
+      <div class="kicker">TABLET STANDALONE</div>
+      <h1>Market Atlas</h1>
+      </div>
+    </div>
+    <div class="meta">
+      <span id="now">-</span>
+      <span id="net-badge" class="badge online">ONLINE</span>
+      <button id="progress-toggle" class="btn ghost">Progress</button>
+      <button id="settings-open" class="btn ghost">Settings</button>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="tabs">
+      <button class="tab active" data-tab="kr">KR</button>
+      <button class="tab" data-tab="us">US</button>
+      <button class="tab" data-tab="closing">Closing</button>
+    </section>
+
+    <section class="card">
+      <div class="row-between">
+        <div class="title-sm" id="tab-title">KR Signals</div>
+        <button id="refresh" class="btn">Refresh</button>
+      </div>
+      <div class="tiny" id="tab-status">Loading...</div>
+      <div id="content" class="content"></div>
+    </section>
+  </main>
+
+  <aside id="progress-panel" class="progress-panel hidden" aria-live="polite">
+    <div class="progress-head">
+      <div>
+        <div class="kicker">LIVE PROGRESS</div>
+        <h3 id="progress-title">Idle</h3>
+      </div>
+      <button id="progress-close" class="btn ghost">Close</button>
+    </div>
+    <div class="progress-context">
+      <div class="tiny">Tab: <span id="progress-tab">-</span></div>
+      <div class="tiny">Current: <span id="progress-current">-</span></div>
+    </div>
+    <div class="progress-bar-wrap" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-aria">
+      <div id="progress-bar" class="progress-bar"></div>
+    </div>
+    <div id="progress-summary" class="tiny">No active job.</div>
+    <div class="progress-criteria">
+      <div class="tiny">Evaluation</div>
+      <div id="progress-criteria-text" class="tiny dim">score = 58 + (5D*3.2) + (1M*1.1), grade: S/A/B/C</div>
+    </div>
+    <div id="progress-list" class="progress-list"></div>
+  </aside>
+
+  <section id="settings-screen" class="settings-screen hidden" aria-modal="true" role="dialog">
+    <div class="settings-card">
+      <div class="settings-head">
+        <div>
+          <div class="kicker">SETTINGS</div>
+          <h2>API Key Setup</h2>
+          <p class="tiny dim">최초 1회 입력 후 필요할 때만 다시 열어 수정하세요.</p>
+        </div>
+        <button id="settings-close" class="btn ghost">Close</button>
+      </div>
+
+      <div class="settings-grid">
+        <label class="settings-field">
+          <span>OPENAI_API_KEY</span>
+          <input id="settings-openai-key" type="password" placeholder="sk-...">
+        </label>
+        <label class="settings-field">
+          <span>GOOGLE_API_KEY</span>
+          <input id="settings-google-key" type="password" placeholder="AIza...">
+        </label>
+        <label class="settings-field">
+          <span>KRX_AUTH_KEY</span>
+          <input id="settings-krx-key" type="password" placeholder="KRX key">
+        </label>
+        <label class="settings-field">
+          <span>FINNHUB_API_KEY</span>
+          <input id="settings-finnhub-key" type="password" placeholder="Finnhub key">
+        </label>
+        <label class="settings-field">
+          <span>ALPHAVANTAGE_API_KEY</span>
+          <input id="settings-av-key" type="password" placeholder="Alpha Vantage key">
+        </label>
+      </div>
+
+      <div class="settings-actions">
+        <button id="keys-load" class="btn ghost">Load Keys</button>
+        <button id="keys-save" class="btn">Save Keys</button>
+        <button id="keys-clear" class="btn danger">Clear Keys</button>
+      </div>
+      <div id="settings-status" class="tiny">Stored locally only.</div>
+    </div>
+  </section>
+
+  <script src="./app.js"></script>
+</body>
+</html>
