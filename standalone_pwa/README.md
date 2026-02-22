@@ -7,9 +7,9 @@
 ## What this app does
 - URL entry: `standalone_pwa/index.html`
 - Tabs:
-  - KR: DIRECT -> CACHE
-  - US: DIRECT -> CACHE
-  - Closing: DIRECT(KR proxy) -> CACHE
+  - KR: KRX direct -> CACHE
+  - US: Finnhub direct, fallback to Alpha Vantage -> CACHE
+  - Closing: KRX direct -> CACHE
 - Cache TTL:
   - KR: 30 min
   - US: 30 min
@@ -28,6 +28,10 @@
 
 ## Notes
 - Keys are stored in an encrypted vault (`IndexedDB + WebCrypto AES-GCM`).
+- Required keys:
+  - `KRX_AUTH_KEY`
+  - `FINNHUB_API_KEY` (US primary)
+  - `ALPHAVANTAGE_API_KEY` (US fallback)
 - Use `Settings -> Load Keys` when you need to load saved keys into the input form again.
 - This app intentionally avoids backend endpoints.
 - Data quality depends on availability/policy of direct market endpoints.

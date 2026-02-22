@@ -304,41 +304,6 @@
     return parseKrxRows(data);
   }
 
-  async function fetchKrxSnapshot(authKey, targetCodes) {
-    if (!authKey) return { ok: false, reason: "NO_KRX_KEY", basDd: null, map: {} };
-    const wanted = new Set((targetCodes || []).map((x) => String(x).padStart(6, "0")));
-    const dates = candidateDates(10);
-    const paths = ["/svc/apis/sto/stk_bydd_trd", "/svc/apis/sto/ksq_bydd_trd"];
-    let lastErr = "KRX_UNKNOWN";
-
-    for (const basDd of dates) {
-      try {
-        const [kospi, kosdaq] = await Promise.all([
-          fetchKrxRows(paths[0], basDd, authKey),
-          fetchKrxRows(paths[1], basDd, authKey)
-        ]);
-        const all = [...kospi, ...kosdaq];
-        if (!all.length) {
-          lastErr = `KRX_EMPTY_${basDd}`;
-          continue;
-        }
-        const map = {};
-        for (const row of all) {
-          const code = krxCodeFromRow(row);
-          if (!wanted.has(code)) continue;
-          const close = krxCloseFromRow(row);
-          if (!Number.isFinite(close)) continue;
-          map[code] = { close, raw: row };
-        }
-        return { ok: true, reason: "KRX_OK", basDd, map };
-      } catch (e) {
-        lastErr = e.message || "KRX_FETCH_FAIL";
-      }
-    }
-
-    return { ok: false, reason: lastErr, basDd: null, map: {} };
-  }
-
   async function fetchKrxHistory(authKey, targetCodes, minPoints) {
     if (!authKey) {
       return { ok: false, reason: "NO_KRX_KEY", latestDate: null, latestMap: {}, historyMap: {} };
@@ -678,7 +643,6 @@
 
       writeCache(tab, data);
       renderList(data.slice(0, 8), `Mode: DIRECT | Updated ${new Date().toLocaleTimeString("ko-KR")}`);
-      setText("global-mode", "DIRECT");
       Progress.finish("DIRECT completed");
       return;
     } catch (e) {
@@ -689,7 +653,6 @@
     const cached = readCache(tab);
     if (cached) {
       renderList(cached.slice(0, 8), "Mode: CACHE | DIRECT unavailable");
-      setText("global-mode", "CACHE");
       return;
     }
     const reason = (directError && directError.message) ? directError.message : "unknown";
@@ -706,12 +669,10 @@
         <div class="item-sub">DIRECT 실패 원인: ${reason}</div>
         <div class="item-reason">${tips}</div>
       </div>`;
-    setText("global-mode", "UNAVAILABLE");
   }
 
   function updateNow() {
     setText("now", new Date().toLocaleString("ko-KR"));
-    setText("device-meta", `${window.innerWidth}x${window.innerHeight} | DPR ${window.devicePixelRatio || 1}`);
   }
 
   function updateNet() {
@@ -845,13 +806,10 @@
 
   async function syncKeyStatus(runtimeLoaded) {
     const loaded = await SecureVault.load();
-    const o = (loaded && loaded.OPENAI_API_KEY) || "";
-    const g = (loaded && loaded.GOOGLE_API_KEY) || "";
     const k = (loaded && loaded.KRX_AUTH_KEY) || "";
     const f = (loaded && loaded.FINNHUB_API_KEY) || "";
     const a = (loaded && loaded.ALPHAVANTAGE_API_KEY) || "";
-    const text = `OPENAI=${mask(o)} | GOOGLE=${mask(g)} | KRX=${mask(k)} | FINNHUB=${mask(f)} | AV=${mask(a)} | runtime=${runtimeLoaded ? "LOADED" : "IDLE"}`;
-    setText("keys-status", text);
+    const text = `KRX=${mask(k)} | FINNHUB=${mask(f)} | AV=${mask(a)} | runtime=${runtimeLoaded ? "LOADED" : "IDLE"}`;
     const settingsStatus = q("settings-status");
     if (settingsStatus) settingsStatus.textContent = text;
   }
@@ -872,8 +830,6 @@
 
     q("keys-load").addEventListener("click", async () => {
       const loaded = await SecureVault.load();
-      q("settings-openai-key").value = (loaded && loaded.OPENAI_API_KEY) || "";
-      q("settings-google-key").value = (loaded && loaded.GOOGLE_API_KEY) || "";
       q("settings-krx-key").value = (loaded && loaded.KRX_AUTH_KEY) || "";
       q("settings-finnhub-key").value = (loaded && loaded.FINNHUB_API_KEY) || "";
       q("settings-av-key").value = (loaded && loaded.ALPHAVANTAGE_API_KEY) || "";
@@ -882,14 +838,10 @@
 
     q("keys-save").addEventListener("click", async () => {
       await SecureVault.save({
-        OPENAI_API_KEY: (q("settings-openai-key").value || "").trim(),
-        GOOGLE_API_KEY: (q("settings-google-key").value || "").trim(),
         KRX_AUTH_KEY: (q("settings-krx-key").value || "").trim(),
         FINNHUB_API_KEY: (q("settings-finnhub-key").value || "").trim(),
         ALPHAVANTAGE_API_KEY: (q("settings-av-key").value || "").trim()
       });
-      q("settings-openai-key").value = "";
-      q("settings-google-key").value = "";
       q("settings-krx-key").value = "";
       q("settings-finnhub-key").value = "";
       q("settings-av-key").value = "";
@@ -900,8 +852,6 @@
     q("keys-clear").addEventListener("click", async () => {
       await SecureVault.clear();
       await syncKeyStatus(false);
-      q("settings-openai-key").value = "";
-      q("settings-google-key").value = "";
       q("settings-krx-key").value = "";
       q("settings-finnhub-key").value = "";
       q("settings-av-key").value = "";
